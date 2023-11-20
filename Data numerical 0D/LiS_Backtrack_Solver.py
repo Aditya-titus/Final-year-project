@@ -10,7 +10,6 @@ class LiSModel:
         self.F = 96485.3321233100184 
         self.Ms = 32
         self.nH = 4
-        self.nM = 2
         self.nL = 2
         self.ns8 = 8
         self.R = 8.3145
@@ -18,20 +17,13 @@ class LiSModel:
         self.a = 0.96
         self.v = 1.14e-5
         self.EH0 = 2.35
-        self.EM0 = 1.95
         self.EL0= 1.94
         self.jH0 = 1e-3
-        self.jM0 = 1e-3
         self.jL0 = 1e-3
-        self.CT0 = 165.51693435356822 # GD
-        self.D8 = 0.01 * 0.75
-        self.D4 = 0.000250 * 0.75
-        self.D2 = 0.0000001 * 0.75
-        self.D1 = 0.0000001 * 0.75
-        self.DLi = 2.2625e-3 * 0.585 # GD
         self.kp = 0.45 # GD
         self.ks = 0
-        self.Ksp = 1
+        # self.Ksp = 1
+        self.s_sat = 1e-4
         self.T = 292.15
         
         # Store variables
