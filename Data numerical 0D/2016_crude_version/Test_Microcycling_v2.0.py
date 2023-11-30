@@ -1,5 +1,7 @@
 import numpy as np
-from LiS_Model_Solver import LiS_Solver
+import pandas as pd
+import matplotlib.pyplot as plt
+from LiS_Module_Solver import LiS_Solver
 
 ## Now we call the solver and solve ##
 span = 3600
@@ -19,7 +21,7 @@ I = 1.7 # Current (constant)
 discharge_break = 2.241 # Voltage point where simulation is stopped to prevent Singular Matrix Error
 charge_break = 2.45
 
-cycles = 5 ## Number of cycles to run (1 cycle is Discharge followed by Charge)
+cycles = 1 ## Number of cycles to run (1 cycle is Discharge followed by Charge)
 overall_array = []
 for j in range(cycles):
     overall_array.append([])
@@ -31,6 +33,7 @@ for i in range(cycles):
     solved = LiS_Solver(s8i, s4i, s2i, si, Vi, spi, 
                         t_end, h0, I, discharge_break, state='Discharge', t0=t0)
     
+
     list1 = solved
     overall_array[i].append(list1)
     s8i = solved[0][-1]
@@ -67,3 +70,30 @@ overall_array_np[:] = overall_array
 np.savez('variable_arrays.npz', solved=overall_array_np, I=I)
 print("Solved array returned in the form: [s8_array, s4_array, s2_array, s_array, V_array, sp_array, time_array]")
 print("The indexing of the variables follows the list above, Ex: Voltage is index:4 or Precipitated Sulfur is index:5")
+
+excel_array = []
+excel_2_array = []
+
+for i in range(len(overall_array_np[0][0][0])-1):
+    list = []
+    list2 = []
+    for j in range(len(overall_array_np[0][0])):
+        list.append(overall_array[0][0][j][i])
+        list2.append(overall_array[0][0][j][i+1])
+    excel_array.append(list)
+    excel_2_array.append(list2)
+
+excel_array = np.array(excel_array)
+excel_2_array = np.array(excel_2_array)
+
+
+concatenated_array = np.concatenate((excel_array, excel_2_array), axis = 1)
+
+
+columns = ['S8_cur','S4_cur','S2_cur','S1_cur','V_cur', 'Sp_cur','t_cur', 'S8_nxt','S4_nxt','S2_nxt','S1_nxt','V_nxt', 'Sp_nxt','t_nxt']
+
+df = pd.DataFrame(concatenated_array[:, :], columns=columns)
+
+file_path = 'C:/Users/ADITYA/OneDrive - Imperial College London/Year 4/FYP/Final-year-project/Data numerical 0D/2016_crude_version/dataset.xlsx'
+
+df.to_excel(file_path, index=True)

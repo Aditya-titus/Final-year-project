@@ -101,22 +101,21 @@ V_index = find_index_with_v([str(item) for item in var_list])
 fh = 2*Ms*v
 fl = ((Ms**2)*(v**2))/2
 
-EH = EH0 + (((R*T)/4*F) * ln((fh*s8_cath)/(s4_cath**2)))
-EL = EL0 + (((R*T)/4*F) *ln((fl*s4_cath)/(s1_cath**2*s2_cath)))
+EH = EH0 + (((R*T)/4*F)*log((fh*s8_cath)/(s4_cath**2)))
+EL = EL0 + (((R*T)/4*F)*log((fl*s4_cath)/((s1_cath**2)*s2_cath)))
 
-nH = V - EH
-nL = V - EL
+etaH = V - EH
+etaL = V - EL
 
-iH = 2*jH0*a*exp((2*F*nH)/(R*T))   # Need to find values for iH0 and iL0 
-iL = 2*jL0*a*exp((2*F*nL)/(R*T))
-
+iH = (-2*jH0*a)*(sinh((2*F*etaH)/(R*T)))   # Need to find values for iH0 and iL0 
+iL = (-2*jL0*a)*(sinh((2*F*etaL)/(R*T)))
 
 ## Now we define the Backward Euler Equations:
 
 # =============================================================================
 # u2 is the discretised function for s8_cath (time-dependent) and Jacobian Elements
 # =============================================================================
-k_s8_cath = -1*(iH*2*Ms/(F)) - (ks*s8_cath)
+k_s8_cath = -1*((iH*2*Ms)/F) - (ks*s8_cath)
 
 u2 = h*k_s8_cath - s8_cath + s8_cath_prev
 
@@ -125,7 +124,7 @@ u2_ders = var_func_der(var_list, u2, sym)
 # =============================================================================
 # u3 is the discretised function for s4_cath (time-dependent) and Jacobian Elements  
 # =============================================================================
-k_s4_cath = (iH*2*Ms/(F)) + (ks*s8_cath) - ((Ms*iL)/F)
+k_s4_cath = ((iH*2*Ms)/F) + (ks*s8_cath) - ((Ms*iL)/F)
 
 u3 = h*k_s4_cath - s4_cath + s4_cath_prev
 
@@ -143,7 +142,7 @@ u4_ders = var_func_der(var_list, u4, sym)
 # =============================================================================
 # u5 is the discretised function for s1_cath (time-dependent) and Jacobian Elements    
 # =============================================================================
-k_s1_cath = ((Ms*iL)/(2*F)) - (kp*sp_cath*(s1_cath - s_sat)/(v*ps))
+k_s1_cath = ((Ms*iL)/(2*F)) - ((kp*sp_cath*(s1_cath - s_sat))/(v*ps))
 
 u5 = h*k_s1_cath - s1_cath + s1_cath_prev
 
@@ -152,7 +151,7 @@ u5_ders = var_func_der(var_list, u5, sym)
 # =============================================================================
 # u6 is the discretised function for sp_cath (time-dependent) and Jacobian Elements   
 # =============================================================================
-k_sp_cath = (kp*sp_cath*(s1_cath - s_sat)/(v*ps))
+k_sp_cath = ((kp*sp_cath*(s1_cath - s_sat))/(v*ps))
 
 u6 = h*k_sp_cath - sp_cath + sp_cath_prev
 

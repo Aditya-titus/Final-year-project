@@ -15,16 +15,16 @@ class LiSModel:
         self.R = 8.3145
         self.ps = 2e3
         self.a = 0.96
-        self.v = 1.14e-5
+        self.v = 1.14e-3
         self.EH0 = 2.35
-        self.EL0= 1.94
-        self.jH0 = 1e-3
-        self.jL0 = 1e-3
-        self.kp = 0.45 # GD
-        self.ks = 0
+        self.EL0= 2.195
+        self.jH0 = 10
+        self.jL0 = 5
+        self.kp = 100 # GD
+        self.ks = 2e-4
         # self.Ksp = 1
         self.s_sat = 1e-4
-        self.T = 292.15
+        self.T = 298
         
         # Store variables
         self.x = x
