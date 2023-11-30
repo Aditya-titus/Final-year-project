@@ -101,8 +101,8 @@ V_index = find_index_with_v([str(item) for item in var_list])
 fh = 2*Ms*v
 fl = ((Ms**2)*(v**2))/2
 
-EH = EH0 + (((R*T)/4*F)*log((fh*s8_cath)/(s4_cath**2)))
-EL = EL0 + (((R*T)/4*F)*log((fl*s4_cath)/((s1_cath**2)*s2_cath)))
+EH = EH0 + (((R*T)/(4*F))*log((fh*s8_cath)/(s4_cath**2)))
+EL = EL0 + (((R*T)/(4*F))*log((fl*s4_cath)/((s1_cath**2)*s2_cath)))
 
 etaH = V - EH
 etaL = V - EL
