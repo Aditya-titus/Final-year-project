@@ -65,35 +65,65 @@ for i in range(cycles):
 overall_array_np = np.empty(len(overall_array), dtype=object)
 overall_array_np[:] = overall_array
 
+print(len(overall_array_np))
+print(len(overall_array_np[0]))
+print(len(overall_array_np[0][0]))
+
 ## Now we save the array above ##
 ## The results can be obtained in the Test_Saved_Microcycling.py script
 np.savez('variable_arrays.npz', solved=overall_array_np, I=I)
 print("Solved array returned in the form: [s8_array, s4_array, s2_array, s_array, V_array, sp_array, time_array]")
 print("The indexing of the variables follows the list above, Ex: Voltage is index:4 or Precipitated Sulfur is index:5")
 
-excel_array = []
-excel_2_array = []
 
-for i in range(len(overall_array_np[0][0][0])-1):
-    list = []
-    list2 = []
-    for j in range(len(overall_array_np[0][0])):
-        list.append(overall_array[0][0][j][i])
-        list2.append(overall_array[0][0][j][i+1])
-    excel_array.append(list)
-    excel_2_array.append(list2)
+def Data_extraction(overall_array_np):
 
-excel_array = np.array(excel_array)
-excel_2_array = np.array(excel_2_array)
+    # Getting data from the dataset and arranging in required format
+    excel_array = []
+    for i in range(len(overall_array_np[0][0][0])):
+        list = []
+        for j in range(len(overall_array_np[0][0])):
+            list.append(overall_array[0][0][j][i])
+        excel_array.append(list)
+    excel_array = np.array(excel_array)
 
+    # Ensuring all timesteps are constant
+    desired_time_increment = 0.5
 
-concatenated_array = np.concatenate((excel_array, excel_2_array), axis = 1)
+    # Calculate the minimum and maximum time values in the array
+    min_time = excel_array[:, 6].min()
+    max_time = excel_array[:, 6].max()
 
+    # Create a new array with the desired time increments
+    new_time_values = np.arange(min_time, max_time + desired_time_increment, desired_time_increment)
 
-columns = ['S8_cur','S4_cur','S2_cur','S1_cur','V_cur', 'Sp_cur','t_cur', 'S8_nxt','S4_nxt','S2_nxt','S1_nxt','V_nxt', 'Sp_nxt','t_nxt']
+    # Initialize arrays to store interpolated values
+    interpolated_values = np.zeros((len(new_time_values), 6))
 
-df = pd.DataFrame(concatenated_array[:, :], columns=columns)
+    # Interpolate each column based on time
+    for col_index in range(6):
+        interpolated_values[:, col_index] = np.interp(new_time_values, excel_array[:, 6], excel_array[:, col_index])
+    current_timestep = np.column_stack((interpolated_values, new_time_values))
 
-file_path = 'C:/Users/ADITYA/OneDrive - Imperial College London/Year 4/FYP/Final-year-project/Data numerical 0D/2016_crude_version/dataset.xlsx'
+    next_timestep = []
+    # Stacking next timestep side by side with the current timestep
+    for i in range(len(current_timestep)-1):
+        next_timestep.append(current_timestep[i+1])
+    next_timestep = np.array(next_timestep)
 
-df.to_excel(file_path, index=True)
+    # Removing last timestep in array to match with the next_timestep array
+    current_timestep_data = current_timestep[:-1]
+
+    # Forming the overall dataset
+    training_data = np.concatenate((current_timestep_data, next_timestep), axis = 1)
+
+    # Converting to pandas dataframe to store as an excel file    
+    columns = ['S8_cur','S4_cur','S2_cur','S1_cur','V_cur', 'Sp_cur','t_cur', 'S8_nxt','S4_nxt','S2_nxt','S1_nxt','V_nxt', 'Sp_nxt','t_nxt']
+    df = pd.DataFrame(training_data[:, :], columns=columns)
+    file_path = 'C:/Users/ADITYA/OneDrive - Imperial College London/Year 4/FYP/Final-year-project/Data numerical 0D/2016_crude_version/dataset_updated.xlsx'
+    df.to_excel(file_path, index=True)
+
+    return training_data
+        
+
+# Dataset = Data_extraction(overall_array_np)
