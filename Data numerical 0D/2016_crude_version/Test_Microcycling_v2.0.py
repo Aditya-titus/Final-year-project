@@ -17,57 +17,67 @@ s2i = 0.002697299116926997
 si = 8.83072852310722e-10
 spi = 2.7e-06
 Vi = 2.430277479547109
-I = 1.7 # Current (constant)
+I = [1.6,1.7,1.8]
 discharge_break = 2.241 # Voltage point where simulation is stopped to prevent Singular Matrix Error
 charge_break = 2.45
 
-cycles = 1 ## Number of cycles to run (1 cycle is Discharge followed by Charge)
-overall_array = []
-for j in range(cycles):
-    overall_array.append([])
-    
+final_array = []
 
-## Run the solver within a for loop and cycle between Discharge and Charge
-for i in range(cycles):
-    # Discharge
-    solved = LiS_Solver(s8i, s4i, s2i, si, Vi, spi, 
-                        t_end, h0, I, discharge_break, state='Discharge', t0=t0)
-    
+for k in range(len(I)):
 
-    list1 = solved
-    overall_array[i].append(list1)
-    s8i = solved[0][-1]
-    s4i = solved[1][-1]
-    s2i = solved[2][-1]
-    si = solved[3][-1]
-    Vi = solved[4][-1]
-    spi = solved[5][-1]
-    t0 = solved[6][-1]
-    t_end = t0 + span
+    cycles = 1 ## Number of cycles to run (1 cycle is Discharge followed by Charge)
+    overall_array = []
     
-    # Charge
-    solved2 = LiS_Solver(s8i, s4i, s2i, si, Vi, spi, 
-                        t_end, 1, -I, charge_break, state='Charge', t0=t0)
-    
-    list2 = solved2
-    overall_array[i].append(list2)
-    s8i = solved2[0][-1]
-    s4i = solved2[1][-1]
-    s2i = solved2[2][-1]
-    si = solved2[3][-1]
-    Vi = solved2[4][-1]
-    spi = solved2[5][-1]
-    t0 = solved2[6][-1]
-    t_end = t0 + span
-      
-    print(f'No. Cycles: {i+1}/{cycles}')
+    for j in range(cycles):
+        overall_array.append([])
 
-overall_array_np = np.empty(len(overall_array), dtype=object)
-overall_array_np[:] = overall_array
+    ## Run the solver within a for loop and cycle between Discharge and Charge
+    for i in range(cycles):
+        # Discharge
+        solved = LiS_Solver(s8i, s4i, s2i, si, Vi, spi, 
+                            t_end, h0, I[k], discharge_break, state='Discharge', t0=t0)
+        
 
-print(len(overall_array_np))
-print(len(overall_array_np[0]))
-print(len(overall_array_np[0][0]))
+
+        list1 = solved
+        # solved_with_column = [row + [I[k]] for row in list1]
+        overall_array[i].append(list1)
+        s8i = solved[0][-1]
+        s4i = solved[1][-1]
+        s2i = solved[2][-1]
+        si = solved[3][-1]
+        Vi = solved[4][-1]
+        spi = solved[5][-1]
+        t0 = solved[6][-1]
+        t_end = t0 + span
+        
+        # Charge
+        solved2 = LiS_Solver(s8i, s4i, s2i, si, Vi, spi, 
+                            t_end, 1, -I[k], charge_break, state='Charge', t0=t0)
+        
+        list2 = solved2
+        overall_array[i].append(list2)
+        s8i = solved2[0][-1]
+        s4i = solved2[1][-1]
+        s2i = solved2[2][-1]
+        si = solved2[3][-1]
+        Vi = solved2[4][-1]
+        spi = solved2[5][-1]
+        t0 = solved2[6][-1]
+        t_end = t0 + span
+        
+        print(f'No. Cycles: {i+1}/{cycles}')
+
+    overall_array_np = np.empty(len(overall_array), dtype=object)
+    overall_array_np[:] = overall_array
+
+    # Append the numpy array to the results list for this current
+    final_array.append(overall_array_np)
+
+# Now, results_list contains the results for each current value
+for k, current_value in enumerate(I):
+    print(f'Current Value: {current_value}')
+    print(final_array[k])  # Print the results for this current
 
 ## Now we save the array above ##
 ## The results can be obtained in the Test_Saved_Microcycling.py script
@@ -80,12 +90,15 @@ def Data_extraction(overall_array_np):
 
     # Getting data from the dataset and arranging in required format
     excel_array = []
-    for i in range(len(overall_array_np[0][0][0])):
+    # for k in range(len(I)):
+    for i in range(len(final_array[0][0][0][0])):
         list = []
-        for j in range(len(overall_array_np[0][0])):
-            list.append(overall_array[0][0][j][i])
+        for j in range(len(final_array[0][0][0])):
+            list.append(final_array[0][0][0][j][i])
         excel_array.append(list)
+        # excel_array.append()
     excel_array = np.array(excel_array)
+    
 
     # Ensuring all timesteps are constant
     desired_time_increment = 0.5
