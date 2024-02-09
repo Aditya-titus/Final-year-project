@@ -5,7 +5,7 @@ Machine learning applied to 0D numerical Li-S model
 - [Introduction](#Introduction)
 - [Objectives](#Objectives)
 - [Data formatting](#Data-Formatting)
-- [Feature extraction](#Feature_extraction)
+- [Feature extraction](#Feature-extraction)
 - [Next timestep predictions](#Next-timestep-predictions)
 - [LSTM](#LSTM)
 
